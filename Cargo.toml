@@ -21,6 +21,7 @@ name = "rust-api-tutorial-3"
 
 [dependencies]
 actix-web = "4.0.0"
+serde = { version = "1.0.0", features = ["derive"] }
 tokio = { version = "1.0.0", features = ["macros", "rt-multi-thread"] }
 
 [dev-dependencies]
