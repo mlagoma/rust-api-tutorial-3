@@ -1,4 +1,4 @@
-use rust_api_tutorial_3::run;
+use rust_api_tutorial_3::startup::run;
 use std::net::TcpListener;
 
 /// Spin up an instance of our application 
