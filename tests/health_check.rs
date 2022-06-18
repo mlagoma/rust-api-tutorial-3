@@ -1,8 +1,9 @@
 use rust_api_tutorial_3::startup::run;
-use rust_api_tutorial_3::configuration::get_configuration;
+use rust_api_tutorial_3::configuration::{get_configuration, DatabaseSettings};
 
 use sqlx::PgPool;
 use std::net::TcpListener;
+use uuid::Uuid;
 
 pub struct TestApp {
     pub address: String,
@@ -16,7 +17,9 @@ async fn spawn_app() -> TestApp {
     let port = listener.local_addr().unwrap().port();
     let address = format!("http://127.0.0.1:{}", port);
 
-    let configuration = get_configuration().expect("Failed to read configuration.");
+    let mut configuration = get_configuration().expect("Failed to read configuration.");
+    configuration.database.database_name = Uuid::new_v4().to_string();
+    
     let connection_pool = PgPool::connect(&configuration.database.connection_string())
         .await
         .expect("Failed to connect to Postgres.");
