@@ -24,18 +24,24 @@ pub async fn subscribe(
     form: web::Form<FormData>,
     pool: web::Data<PgPool>,
 ) -> HttpResponse {
-    // We do not call `.enter` on query_span!
-    // `.instrument` takes care of it at the right moments
-    // in the query future lifetime
-    let query_span = tracing::info_span!(
-        "Saving new subscriber details in the database"
-    );
+    match insert_subscriber(&pool, &form).await
+    {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(_) => HttpResponse::InternalServerError().finish()
+    }
+}
+
+#[tracing::instrument(
+    name = "Saving new subscriber details in the database",
+    skip(form, pool)
+)]
+pub async fn insert_subscriber(
+    pool: &PgPool,
+    form: &FormData,
+) -> Result<(), sqlx::Error> {
     // `Result` has two variants: `Ok` and `Err`.
 	// The first for successes, the second for failures.
-	// We use a `match` statement to choose what to do based
-	// on the outcome.
-	// We will talk more about `Result` going forward!
-    match sqlx::query!(
+    sqlx::query!(
         r#"
         INSERT INTO subscriptions (id, email, name, subscribed_at)
         VALUES ($1, $2, $3, $4)
@@ -49,15 +55,14 @@ pub async fn subscribe(
     // That's when we "exit" the span
 	// We use `get_ref` to get an immutable reference to the `PgConnection`
 	// wrapped by `web::Data`.	// Using the pool as a drop-in replacement	
-    .execute(pool.as_ref())
-    // First we attach the instrumentation, then we `.await` it
-    .instrument(query_span)
+    .execute(pool)
     .await
-    {
-        Ok(_) => HttpResponse::Ok().finish(),
-        Err(e) => {
-            tracing::error!("Failed to execute query: {:?}", e);
-            HttpResponse::InternalServerError().finish()
-        }
-    }
+    .map_err(|e| {
+        tracing::error!("Failed to execute query: {:?}", e);
+        e
+    // Using the `?` operator to return early
+    // if the function failed, returning a sqlx::Error
+    // We will talk about error handling in depth later!
+    })?;
+    Ok(())
 }
