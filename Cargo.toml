@@ -29,6 +29,7 @@ serde = { version = "1.0.0", features = ["derive"] }
 sqlx = { version = "0.5.13", features = ["runtime-actix-rustls", "macros", "postgres", "uuid", "chrono", "migrate"] }
 tokio = { version = "1.0.0", features = ["macros", "rt-multi-thread"] }
 tracing = { version = "0.1", features = ["log"] }
+tracing-futures = "0.2.5"
 uuid = { version = "0.8.1", features = ["v4"] }
 
 [dev-dependencies]

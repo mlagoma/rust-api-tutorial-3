@@ -3,6 +3,7 @@ use actix_web::{web, App, HttpResponse, HttpServer};
 use sqlx::PgPool;
 use chrono::Utc;
 use uuid::Uuid;
+use tracing_futures::Instrument;
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
@@ -26,7 +27,13 @@ pub async fn subscribe(
     // Using `enter` in an async function is a recipe for disaster!
     // Bear with me for now, but don't do this at home.
     // See the following section on `tracing-futures`
-    let _request_span_guard = request_span.enter();
+    let _request_span_guard = request_span.enter(); 
+    // We do not call `.enter` on query_span!
+    // `.instrument` takes care of it at the right moments
+    // in the query future lifetime
+    let query_span = tracing::info_span!(
+    "Saving new subscriber details in the database"
+    );
     // `Result` has two variants: `Ok` and `Err`.
 	// The first for successes, the second for failures.
 	// We use a `match` statement to choose what to do based
@@ -47,6 +54,8 @@ pub async fn subscribe(
 	// We use `get_ref` to get an immutable reference to the `PgConnection`
 	// wrapped by `web::Data`.	// Using the pool as a drop-in replacement	
     .execute(pool.get_ref())
+    // First we attach the instrumentation, then we `.await` it
+    .instrument(query_span)
     .await
     {
         Ok(_) => {
