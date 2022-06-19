@@ -8,7 +8,7 @@ use std::net::TcpListener;
 // #[actix_web::main] // or #[tokio::main]
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    let subscriber = get_subscriber("rust_api_tutorial_3".into(), "info".into());
+    let subscriber = get_subscriber("rust_api_tutorial_3".into(), "info".into(), std::io::stdout);
     init_subscriber(subscriber);
 
     // Panic if we can't read configuration
