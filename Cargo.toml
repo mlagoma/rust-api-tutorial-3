@@ -28,6 +28,7 @@ serde = { version = "1.0.0", features = ["derive"] }
 sqlx = { version = "0.5.13", features = ["runtime-actix-rustls", "macros", "postgres", "uuid", "chrono", "migrate"] }
 tokio = { version = "1.0.0", features = ["macros", "rt-multi-thread"] }
 tracing = { version = "0.1", features = ["log"] }
+tracing-actix-web = "0.5.1"
 tracing-bunyan-formatter = "0.2"
 tracing-futures = "0.2.5"
 tracing-log = "0.1.3"

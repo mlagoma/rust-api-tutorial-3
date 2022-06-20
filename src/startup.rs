@@ -6,6 +6,7 @@ use actix_web::{web, App, HttpServer};
 use actix_web::middleware::Logger;
 use sqlx::PgPool;
 use std::net::TcpListener;
+use tracing_actix_web::TracingLogger;
 
 // Notice the different signature!
 // We return `Server` on the happy path and we dropped the `async` keyword
@@ -20,8 +21,8 @@ pub fn run(
     // Capture `connection` from the surrounding environment
     let server = HttpServer::new(move || {
         App::new()
-            // Middlewares are added using the `wrap` method on `App`
-            .wrap(Logger::default())
+            // Instead of `Logger::default`
+            .wrap(TracingLogger::default())
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))
             // Get a pointer copy and attach it to the application state
